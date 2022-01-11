@@ -57,40 +57,6 @@ def make_picks(card_list_data, min_delta, min_price, max_price):
     
     return picks
 
-        
-        
-
-
-"""
-    for item in card_list_data:
-        usd = item["prices"]["usd"]
-        if usd is None:
-            usd = 0
-        else:
-            usd = float(usd)
-        eur = item["prices"]["eur"]
-        if eur is None:
-            eur = 0
-        else:
-            eur = float(eur)
-        if usd > 2 and eur > 0:
-            dif = usd - eur * eur_to_usd
-            per_dif_us = 100 * dif/(eur * eur_to_usd)
-            if per_dif_us > 100 or dif > 20:
-                output.append({
-                    "name": item["name"],
-                    "set": item["set"],
-                    "set_name": item["set_name"],
-                    "usd": usd, 
-                    "eur": eur,
-                    "eur_in_usd": eur * eur_to_usd,
-                    "dif": dif,
-                    "percent_dif": per_dif_us,
-                    "uri": item["scryfall_uri"]
-                    })
-    return output
-"""
-
 def write_time_file(dir_path_str, content, ftype=".json"):
     """
     Writes a timestamped file to the given directory.
@@ -196,7 +162,8 @@ def generate_picks(json_file_path, min_delta, min_price, max_price):
     """
     with open(json_file_path) as df:
         data = json.load(df)
-    output = make_picks(data, min_delta, min_price, max_price)
+    filters = {"min_delta": min_delta, "min_price": min_price, "max_price": max_price}
+    output = {"search_filters": filters, "picks": make_picks(data, min_delta, min_price, max_price)}
     print("Complete! Now dumping picks...")
     return write_time_file("output/", output)
 
@@ -211,7 +178,10 @@ def refresh(picks_file_path):
             new_pick_data (string): path of refreshed pick data
     """
     with open(picks_file_path) as df:
-        data = json.load(df)
+        content = json.load(df)
+
+    filters = content["search_filters"]
+    data = content["picks"]
     
     multi_requests = False
     identifiers = []
@@ -246,5 +216,5 @@ def refresh(picks_file_path):
         except requests.exceptions.HTTPError as err:
             SystemExit(err)
     
-    new_data_path = write_time_file("updates/", response)
-    return generate_picks(new_data_path)
+    new_data_path = write_time_file("refresh_data/", response)
+    return generate_picks(new_data_path, filters["min_delta"], filters["min_price"], filters["max_price"])
