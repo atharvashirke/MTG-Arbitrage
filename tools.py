@@ -15,7 +15,11 @@ def get_exchange_rate(from_currency, to_currency):
         Returns:
             exchange_rate (float): rate of exchange for from_currency:to_currency
     """
-    response = requests.get("https://v6.exchangerate-api.com/v6/0e164fc6317a50745338c53e/latest/" + from_currency)
+    try:
+        response = requests.get("https://v6.exchangerate-api.com/v6/0e164fc6317a50745338c53e/latest/" + from_currency)
+    except requests.exceptions.HTTPError as err:
+        SystemExit(err)
+
     exchange_rate = float(response.json()["conversion_rates"][to_currency])
     return exchange_rate
     
@@ -127,7 +131,11 @@ def fetch_bulk_reference():
         Returns:
             bulk_ref_path (string): string path of created file
     """
-    response = requests.get("https://api.scryfall.com/bulk-data")
+    try:
+        response = requests.get("https://api.scryfall.com/bulk-data")
+    except requests.exceptions.HTTPError as err:
+        SystemExit(err)
+
     return write_time_file("bulk_references/", response.json())
 
 
@@ -144,7 +152,11 @@ def fetch_json(bulk_file_path, uri_type=2):
     with open(bulk_file_path) as bdf:
         data = json.load(bdf)["data"][uri_type]
     
-    response = requests.get(data["download_uri"])
+    try:
+        response = requests.get(data["download_uri"])
+    except requests.exceptions.HTTPError as err:
+        SystemExit(err)
+        
     print("Fetched new json bulk file...")
     return write_time_file("data/", response.json())
 
