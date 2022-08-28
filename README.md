@@ -9,8 +9,8 @@ Utilizing card pricing data from multiple international sellers, MTG Arbitrage a
 Clone the repo and run the following.
 
 ```bash
-cd MTG-Arbitrage
-python3 main.py
+>>> cd MTG-Arbitrage
+>>> python3 main.py
 ```
     
 
